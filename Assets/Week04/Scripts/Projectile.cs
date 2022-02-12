@@ -1,23 +1,26 @@
 using UnityEngine;
 
-[DisallowMultipleComponent]
-public abstract class Projectile : MonoBehaviour
+namespace Week04
 {
-    [Header("Launch Settings")]
-    [SerializeField]
-    protected Vector3 initVel = Vector3.zero;
-
-    [SerializeField]
-    protected Vector3 initForce = Vector3.zero;
-
-    protected bool IsLaunched { get; private set; }
-
-    public void Launch()
+    [DisallowMultipleComponent]
+    public abstract class Projectile : MonoBehaviour
     {
-        if (IsLaunched) return;
-        LaunchImplementation();
-        IsLaunched = true;
-    }
+        [Header("Launch Settings")]
+        [SerializeField]
+        protected Vector3 initVel = Vector3.zero;
 
-    protected abstract void LaunchImplementation();
+        [SerializeField]
+        protected Vector3 initForce = Vector3.zero;
+
+        protected bool IsLaunched { get; private set; }
+
+        public void Launch()
+        {
+            if (IsLaunched) return;
+            LaunchImplementation();
+            IsLaunched = true;
+        }
+
+        protected abstract void LaunchImplementation();
+    }
 }

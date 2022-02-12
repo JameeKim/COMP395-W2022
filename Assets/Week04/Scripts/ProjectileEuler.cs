@@ -1,42 +1,45 @@
 using UnityEngine;
 
-public class ProjectileEuler : Projectile
+namespace Week04
 {
-    [Header("Physical Properties")]
-    [SerializeField]
-    private float mass = 1;
-
-    [Header("Old Status")]
-    [SerializeField]
-    private Vector3 oldPos;
-
-    [SerializeField]
-    private Vector3 oldVel;
-
-    [SerializeField]
-    private Vector3 oldAcc;
-
-    void FixedUpdate()
+    public class ProjectileEuler : Projectile
     {
-        if (!IsLaunched) return;
+        [Header("Physical Properties")]
+        [SerializeField]
+        private float mass = 1;
 
-        float dt = Time.fixedDeltaTime;
+        [Header("Old Status")]
+        [SerializeField]
+        private Vector3 oldPos;
 
-        Vector3 newAcc = oldAcc;
-        Vector3 newVel = newAcc * dt + oldVel;
-        Vector3 newPos = newVel * dt + oldPos;
+        [SerializeField]
+        private Vector3 oldVel;
 
-        transform.position = newPos;
+        [SerializeField]
+        private Vector3 oldAcc;
 
-        oldAcc = Physics.gravity;
-        oldVel = newVel;
-        oldPos = newPos;
-    }
+        void FixedUpdate()
+        {
+            if (!IsLaunched) return;
 
-    protected override void LaunchImplementation()
-    {
-        oldPos = transform.position;
-        oldVel = initVel;
-        oldAcc = Physics.gravity + initForce / mass;
+            float dt = Time.fixedDeltaTime;
+
+            Vector3 newAcc = oldAcc;
+            Vector3 newVel = newAcc * dt + oldVel;
+            Vector3 newPos = newVel * dt + oldPos;
+
+            transform.position = newPos;
+
+            oldAcc = Physics.gravity;
+            oldVel = newVel;
+            oldPos = newPos;
+        }
+
+        protected override void LaunchImplementation()
+        {
+            oldPos = transform.position;
+            oldVel = initVel;
+            oldAcc = Physics.gravity + initForce / mass;
+        }
     }
 }

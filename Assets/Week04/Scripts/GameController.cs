@@ -1,45 +1,48 @@
 using UnityEngine;
 
-public class GameController : MonoBehaviour
+namespace Week04
 {
-    [System.Serializable]
-    private struct ProjectileInfo
+    public class GameController : MonoBehaviour
     {
-        public Transform spawnPosition;
-        public GameObject projectilePrefab;
-        public Projectile SpawnedProjectile { get; set; }
-    }
-
-    [SerializeField]
-    private ProjectileInfo[] projectiles;
-
-    public void ResetProjectiles()
-    {
-        for (int i = 0; i < projectiles.Length; i++)
+        [System.Serializable]
+        private struct ProjectileInfo
         {
-            if (projectiles[i].SpawnedProjectile)
+            public Transform spawnPosition;
+            public GameObject projectilePrefab;
+            public Projectile SpawnedProjectile { get; set; }
+        }
+
+        [SerializeField]
+        private ProjectileInfo[] projectiles;
+
+        public void ResetProjectiles()
+        {
+            for (int i = 0; i < projectiles.Length; i++)
             {
-                Destroy(projectiles[i].SpawnedProjectile.gameObject);
+                if (projectiles[i].SpawnedProjectile)
+                {
+                    Destroy(projectiles[i].SpawnedProjectile.gameObject);
+                }
+
+                GameObject newProjectile = Instantiate(
+                    projectiles[i].projectilePrefab,
+                    projectiles[i].spawnPosition.position,
+                    projectiles[i].spawnPosition.rotation);
+                projectiles[i].SpawnedProjectile = newProjectile.GetComponent<Projectile>();
             }
-
-            GameObject newProjectile = Instantiate(
-                projectiles[i].projectilePrefab,
-                projectiles[i].spawnPosition.position,
-                projectiles[i].spawnPosition.rotation);
-            projectiles[i].SpawnedProjectile = newProjectile.GetComponent<Projectile>();
         }
-    }
 
-    public void LaunchProjectiles()
-    {
-        foreach (ProjectileInfo info in projectiles)
+        public void LaunchProjectiles()
         {
-            info.SpawnedProjectile.Launch();
+            foreach (ProjectileInfo info in projectiles)
+            {
+                info.SpawnedProjectile.Launch();
+            }
         }
-    }
 
-    void Start()
-    {
-        ResetProjectiles();
+        void Start()
+        {
+            ResetProjectiles();
+        }
     }
 }
