@@ -67,6 +67,7 @@ namespace Week05.Variables
             {
                 valueSlider.maxValue = value;
                 valueMinMax.y = (int) valueSlider.maxValue;
+                valueInput.characterLimit = valueMinMax.y.ToString().Length;
             }
         }
 

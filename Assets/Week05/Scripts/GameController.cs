@@ -75,7 +75,6 @@ namespace Week05
             int numS = numSamplesSlider.Value;
             int numB = numBinsSlider.Value;
             float lam = lambdaSlider.Value;
-            Debug.Log($"Generate {dist.GetName().ToLower()} distribution with lambda {lam} and {numS} samples");
 
             variableSettingsPage.SetActive(false);
             resultsPage.gameObject.SetActive(true);
