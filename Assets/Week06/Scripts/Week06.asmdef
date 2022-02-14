@@ -1,0 +1,16 @@
+{
+    "name": "Week06",
+    "rootNamespace": "Week06",
+    "references": [
+        "GUID:18f0123777d04fb47a422e4b1f978951"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
