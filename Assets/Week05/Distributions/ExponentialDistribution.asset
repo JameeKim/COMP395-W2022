@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c753454b41bb4cf2bbed1b7d22517aca, type: 3}
   m_Name: ExponentialDistribution
   m_EditorClassIdentifier: 
+  meanMultiplierForRange: 5

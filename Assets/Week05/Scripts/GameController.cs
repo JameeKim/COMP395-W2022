@@ -80,13 +80,19 @@ namespace Week05
             resultsPage.gameObject.SetActive(true);
 
             DistributionConfig config = new DistributionConfig { numSamples = numS, numBins = numB, lambda = lam };
-            StartCoroutine(DoGeneration(dist, config));
+            dist.Config = config;
+            StartCoroutine(DoGeneration(dist));
         }
 
         public void BackToSettings()
         {
             variableSettingsPage.SetActive(true);
             resultsPage.gameObject.SetActive(false);
+        }
+
+        public void Quit()
+        {
+            Application.Quit();
         }
 
         private void SyncVarSettings()
@@ -113,29 +119,26 @@ namespace Week05
             resultsPage.OnGenerationFinished();
         }
 
-        private IEnumerator DoGeneration(DistributionMapper dist, DistributionConfig config)
+        private IEnumerator DoGeneration(DistributionMapper dist)
         {
-            dist.Config = config;
             resultsPage.SetUp(dist);
 
             yield return null;
 
-            int numSample = config.numSamples;
+            int numSample = dist.Config.numSamples;
 
             while (true)
             {
                 int limit = Mathf.Min(numSample, maxBatch);
-                int i = 0;
 
-                while (i < limit)
+                for (int i = 0; i < limit; i++)
                 {
                     float rand = Random.value;
                     float mapped = dist.ApplyMapping(rand);
                     resultsPage.OnNumberReceived(mapped);
-                    i++;
                 }
 
-                numSample -= i;
+                numSample -= limit;
 
                 if (numSample > 0)
                 {
