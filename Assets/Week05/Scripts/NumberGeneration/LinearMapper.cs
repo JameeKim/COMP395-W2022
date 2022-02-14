@@ -14,5 +14,10 @@ namespace Week05.NumberGeneration
         {
             return uniformRandom;
         }
+
+        public override Vector2 GetRange()
+        {
+            return new Vector2(0.0f, 1.0f);
+        }
     }
 }

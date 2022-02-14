@@ -1,6 +1,6 @@
+using System.Collections;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 using Utils;
 using Week05.NumberGeneration;
@@ -12,16 +12,9 @@ namespace Week05
     public class GameController : MonoBehaviour
     {
         private const int NUM_SAMPLES_MIN = 100;
-        private const int NUM_SAMPLES_MAX = 10000;
+        private const int NUM_SAMPLES_MAX = 100000;
         private const float LAMBDA_MIN = 0.1f;
         private const float LAMBDA_MAX = 10.0f;
-
-        [System.Serializable]
-        private class NumberGenerationEvent : UnityEvent<float> {}
-
-        [Header("UI")]
-        [SerializeField]
-        private Text title;
 
         [Header("Variable Settings")]
         [SerializeField]
@@ -52,45 +45,16 @@ namespace Week05
         [Header("Results")]
         [SerializeField]
         [Label("Page")]
-        private GameObject resultsPage;
+        private ResultsPage resultsPage;
 
         [SerializeField]
         [Range(1, 1000)]
-        private int generationSpeed = 10;
-
-        [SerializeField]
-        private NumberGenerationEvent onNumberGenerated;
-
-        #region Properties
-
-        public int NumSamples
-        {
-            get => numSamples;
-            set => numSamples = value;
-        }
-
-        public float Lambda
-        {
-            get => lambda;
-            set => lambda = value;
-        }
-
-        public int GenerationSpeed
-        {
-            get => generationSpeed;
-            set => generationSpeed = value;
-        }
-
-        public int DistributionIndex { get; set; }
-
-        private float GenerationInterval => 1.0f / generationSpeed;
-
-        #endregion // Properties
+        private int maxBatch = 100;
 
         void Start()
         {
             variableSettingsPage.SetActive(true);
-            resultsPage.SetActive(false);
+            resultsPage.gameObject.SetActive(false);
 
             SyncVarSettings();
         }
@@ -101,6 +65,18 @@ namespace Week05
             int numS = numSamplesSlider.Value;
             float lam = lambdaSlider.Value;
             Debug.Log($"Generate {dist.GetName().ToLower()} distribution with lambda {lam} and {numS} samples");
+
+            variableSettingsPage.SetActive(false);
+            resultsPage.gameObject.SetActive(true);
+
+            DistributionConfig config = new DistributionConfig { lambda = lam };
+            StartCoroutine(DoGeneration(dist, numS, config));
+        }
+
+        public void BackToSettings()
+        {
+            variableSettingsPage.SetActive(true);
+            resultsPage.gameObject.SetActive(false);
         }
 
         private void SyncVarSettings()
@@ -116,6 +92,46 @@ namespace Week05
             lambdaSlider.Value = lambda;
             lambdaSlider.Min = LAMBDA_MIN;
             lambdaSlider.Max = LAMBDA_MAX;
+        }
+
+        private void OnGenerationFinished()
+        {
+            resultsPage.OnGenerationFinished();
+        }
+
+        private IEnumerator DoGeneration(DistributionMapper dist, int numSample, DistributionConfig config)
+        {
+            dist.Config = config;
+            resultsPage.SetUp(dist, numSample);
+
+            yield return null;
+
+            while (true)
+            {
+                int limit = Mathf.Min(numSample, maxBatch);
+                int i = 0;
+
+                while (i < limit)
+                {
+                    float rand = Random.value;
+                    float mapped = dist.ApplyMapping(rand);
+                    resultsPage.OnNumberReceived(mapped);
+                    i++;
+                }
+
+                numSample -= i;
+
+                if (numSample > 0)
+                {
+                    yield return null;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            OnGenerationFinished();
         }
     }
 }
