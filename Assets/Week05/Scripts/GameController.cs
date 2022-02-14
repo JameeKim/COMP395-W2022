@@ -13,6 +13,8 @@ namespace Week05
     {
         private const int NUM_SAMPLES_MIN = 100;
         private const int NUM_SAMPLES_MAX = 100000;
+        private const int NUM_BINS_MIN = 5;
+        private const int NUM_BINS_MAX = 30;
         private const float LAMBDA_MIN = 0.1f;
         private const float LAMBDA_MAX = 10.0f;
 
@@ -30,10 +32,18 @@ namespace Week05
         [SerializeField]
         [Range(NUM_SAMPLES_MIN, NUM_SAMPLES_MAX)]
         [Label("# of Samples")]
-        private int numSamples = 500;
+        private int numSamples = 1000;
 
         [SerializeField]
         private IntegerVariableSlider numSamplesSlider;
+
+        [SerializeField]
+        [Range(NUM_BINS_MIN, NUM_BINS_MAX)]
+        [Label("# of Bins")]
+        private int numBins = 20;
+
+        [SerializeField]
+        private IntegerVariableSlider numBinsSlider;
 
         [SerializeField]
         [Range(LAMBDA_MIN, LAMBDA_MAX)]
@@ -63,14 +73,15 @@ namespace Week05
         {
             DistributionMapper dist = distributions[distributionDropdown.value];
             int numS = numSamplesSlider.Value;
+            int numB = numBinsSlider.Value;
             float lam = lambdaSlider.Value;
             Debug.Log($"Generate {dist.GetName().ToLower()} distribution with lambda {lam} and {numS} samples");
 
             variableSettingsPage.SetActive(false);
             resultsPage.gameObject.SetActive(true);
 
-            DistributionConfig config = new DistributionConfig { lambda = lam };
-            StartCoroutine(DoGeneration(dist, numS, config));
+            DistributionConfig config = new DistributionConfig { numSamples = numS, numBins = numB, lambda = lam };
+            StartCoroutine(DoGeneration(dist, config));
         }
 
         public void BackToSettings()
@@ -89,6 +100,10 @@ namespace Week05
             numSamplesSlider.Min = NUM_SAMPLES_MIN;
             numSamplesSlider.Max = NUM_SAMPLES_MAX;
 
+            numBinsSlider.Value = numBins;
+            numBinsSlider.Min = NUM_BINS_MIN;
+            numBinsSlider.Max = NUM_BINS_MAX;
+
             lambdaSlider.Value = lambda;
             lambdaSlider.Min = LAMBDA_MIN;
             lambdaSlider.Max = LAMBDA_MAX;
@@ -99,12 +114,14 @@ namespace Week05
             resultsPage.OnGenerationFinished();
         }
 
-        private IEnumerator DoGeneration(DistributionMapper dist, int numSample, DistributionConfig config)
+        private IEnumerator DoGeneration(DistributionMapper dist, DistributionConfig config)
         {
             dist.Config = config;
-            resultsPage.SetUp(dist, numSample);
+            resultsPage.SetUp(dist);
 
             yield return null;
+
+            int numSample = config.numSamples;
 
             while (true)
             {

@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using Utils;
 using Week05.NumberGeneration;
 
 namespace Week05
@@ -8,26 +7,25 @@ namespace Week05
     public class ResultsPage : MonoBehaviour
     {
         [SerializeField]
-        [Range(5, 20)]
-        [Label("# of Bins")]
-        private int numBins = 10;
-
-        [SerializeField]
         private Transform graphArea;
 
         [SerializeField]
         private GameObject graphBarPrefab;
 
         [SerializeField]
-        private Button backButton;
+        private Text averageText;
 
-        private Vector2 rangeX;
+        [SerializeField]
+        private Text theoreticalAverageText;
+
+        [SerializeField]
+        private Button backButton;
 
         private GraphBar[] graphBars;
 
-        private int numSamples;
+        private int receivedSamples;
 
-        private int initialMax;
+        private int increment;
 
         private float total;
 
@@ -46,44 +44,38 @@ namespace Week05
             }
         }
 
-        public void SetUp(DistributionMapper dist, int inNumSamples)
+        public void SetUp(DistributionMapper dist)
         {
-            rangeX = dist.GetRange();
-            numSamples = inNumSamples;
+            Vector2 range = dist.GetRange();
+            int numBins = dist.Config.numBins;
+            theoreticalAverageText.text = dist.GetTheoreticalMean().ToString("F3");
+            Vector2Int maxAndIncrement = dist.GetMaxAndIncrementForGraphBar();
+            increment = maxAndIncrement.y;
 
-            initialMax = Mathf.Max(numSamples / numBins, 10);
-            initialMax -= initialMax % 10;
-            float binLength = (rangeX.y - rangeX.x) / numBins;
-            graphBars = new GraphBar[numBins];
+            int initialMax = maxAndIncrement.x;
+            float binLength = (range.y - range.x) / numBins;
+
+            graphBars = new GraphBar[numBins + 2];
+            graphBars[0] = CreateNewBar(range.x, -1.0f, initialMax);
 
             for (int i = 0; i < numBins; i++)
             {
-                GameObject barObj = Instantiate(graphBarPrefab, graphArea);
-                GraphBar bar = barObj.GetComponent<GraphBar>();
-                bar.SetRange(rangeX.x + binLength * i, binLength);
-                bar.IncreaseMax(initialMax);
-                graphBars[i] = bar;
+                graphBars[i + 1] = CreateNewBar(range.x + binLength * i, binLength, initialMax);
             }
+
+            graphBars[numBins + 1] = CreateNewBar(range.y, 0.0f, initialMax);
         }
 
         public void OnNumberReceived(float number)
         {
             total += number;
-
-            if (number < rangeX.x || rangeX.y <= number)
-            {
-                Debug.Log($"Number {number} out of range");
-                return;
-            }
+            receivedSamples += 1;
 
             if (needMoreSpace)
             {
-                int increase = Mathf.Max(initialMax / 10, 10);
-                increase -= increase % 10;
-
                 foreach (GraphBar bar in graphBars)
                 {
-                    bar.IncreaseMax(increase);
+                    bar.IncreaseMax(increment);
                 }
 
                 needMoreSpace = false;
@@ -94,13 +86,15 @@ namespace Week05
                 if (bar.IsInRange(number))
                 {
                     needMoreSpace |= bar.IncreaseByOne();
+                    break;
                 }
             }
+
+            averageText.text = (total / receivedSamples).ToString("F3");
         }
 
         public void OnGenerationFinished()
         {
-            Debug.Log($"Average: {total / numSamples}");
             backButton.interactable = true;
         }
 
@@ -113,12 +107,35 @@ namespace Week05
 
             graphBars = null;
 
+            averageText.text = "0.000";
+            theoreticalAverageText.text = "0.000";
             backButton.interactable = false;
-            rangeX = Vector2.zero;
-            numSamples = 0;
-            initialMax = 0;
+            receivedSamples = 0;
+            increment = 0;
             total = 0.0f;
             needMoreSpace = false;
+        }
+
+        private GraphBar CreateNewBar(float min, float length, int initialMax)
+        {
+            GameObject barObj = Instantiate(graphBarPrefab, graphArea);
+            GraphBar bar = barObj.GetComponent<GraphBar>();
+            bar.IncreaseMax(initialMax);
+
+            switch (length)
+            {
+                case > 0.0f: // regular bin
+                    bar.SetRange(min, length);
+                    break;
+                case <= -1.0f: // left side
+                    bar.SetRim(min, false);
+                    break;
+                default: // right side
+                    bar.SetRim(min, true);
+                    break;
+            }
+
+            return bar;
         }
     }
 }

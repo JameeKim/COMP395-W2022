@@ -19,5 +19,13 @@ namespace Week05.NumberGeneration
         {
             return new Vector2(0.0f, 1.0f);
         }
+
+        public override float GetTheoreticalMean()
+        {
+            return 0.5f;
+        }
+
+        public override Vector2Int GetMaxAndIncrementForGraphBar() =>
+            GetMaxAndIncrementForGraphBarFromInitialMax(Config.numSamples / Config.numBins);
     }
 }

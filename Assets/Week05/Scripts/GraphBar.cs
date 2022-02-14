@@ -18,12 +18,12 @@ namespace Week05
         [SerializeField]
         private Text barValueText;
 
-        [SerializeField]
         private int maxValue;
 
         private int currentValue;
 
         private float rangeMin;
+
         private float rangeMax;
 
         private float Percentage => maxValue > 0 ? (float) currentValue / maxValue : 0.0f;
@@ -33,6 +33,13 @@ namespace Week05
             rangeMin = min;
             rangeMax = min + length;
             bin.text = rangeMax.ToString("F");
+        }
+
+        public void SetRim(float oneRangeValue, bool isOnRightSide)
+        {
+            rangeMin = isOnRightSide ? oneRangeValue : float.MinValue;
+            rangeMax = isOnRightSide ? float.MaxValue : oneRangeValue;
+            bin.text = isOnRightSide ? "Inf" : oneRangeValue.ToString("F");
         }
 
         public void IncreaseMax(int amount)
